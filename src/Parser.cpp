@@ -8,7 +8,9 @@ coefficients coefficients::operator-(coefficients rhs)
 {
 	coefficients ret;
 
-	for (unsigned int index = 0; index < this->coefs.size(); ++index)
+	for (unsigned int index = 0;
+		 index < this->coefs.size() || index < rhs.coefs.size();
+		 ++index)
 	{
 		ret.coefs.insert(
 			std::make_pair(index, this->coefs[index] - rhs.coefs[index]));
@@ -20,10 +22,6 @@ coefficients coefficients::operator-(coefficients rhs)
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
 */
-
-Parser::Parser() : _deg(0)
-{
-}
 
 Parser::Parser(std::string equation) : _deg(0)
 {
@@ -43,19 +41,9 @@ Parser::Parser(std::string equation) : _deg(0)
 	// Detect polynomial degree
 	for (auto i = this->_coefs.coefs.begin(); i != this->_coefs.coefs.end(); ++i)
 	{
-		if (i->first > this->_deg)
+		if (i->first > this->_deg && i->second != 0)
 			this->_deg = i->first;
 	}
-
-	for (auto item : _coefs.coefs)
-	{
-		DEBUG(item.first << ": " << item.second);
-	}
-}
-
-Parser::Parser(const Parser &src)
-{
-	(void)src;
 }
 
 /*
@@ -70,47 +58,11 @@ Parser::~Parser()
 ** --------------------------------- OVERLOAD ---------------------------------
 */
 
-Parser &Parser::operator=(Parser const &rhs)
-{
-	if (this != &rhs)
-	{
-		(void)rhs;
-	}
-	return *this;
-}
-
 /*
 ** --------------------------------- METHODS ----------------------------------
 */
 
 const std::regex matcher("^X\\^.*[0-9]$");
-
-std::string Parser::_removeTrailingZeros(std::string number)
-{
-	if (number.find('.') == std::string::npos)
-	{
-		return number;
-	}
-
-	auto ret = number;
-	for (auto c = ret.rbegin(); c != ret.rend(); ++c)
-	{
-		if (*c == '0' && *(c + 1) == '.')
-		{
-			ret.pop_back();
-			ret.pop_back();
-		}
-		else if (*c == '0')
-		{
-			ret.pop_back();
-		}
-		else
-		{
-			break;
-		}
-	}
-	return ret;
-}
 
 coefficients Parser::_sideParser(std::string side) const
 {
@@ -118,12 +70,19 @@ coefficients Parser::_sideParser(std::string side) const
 	auto items = split(side, "+-");
 	int index = 0;
 
+	// clean the vector if the side begins with '-' or '+'
+
+	if (items.size() >= 1 && trim_copy(items[0]).size() == 0)
+	{
+		items.erase(items.begin());
+	}
+
 	for (auto &item : items)
 	{
 		auto elements = split(item, " *");
 		if (elements.size() != 2)
 		{
-			ERROR("The equation is not formatted correctly: exponents must be written as 'coef * X^n'")
+			ERROR("The equation is not formatted correctly: exponents must be written as 'coef * X^n'.")
 			exit(EXIT_FAILURE);
 		}
 
@@ -131,17 +90,25 @@ coefficients Parser::_sideParser(std::string side) const
 		{
 			if (elements[1][2] - '0' == index)
 			{
-				ret.coefs[index] = std::stod(elements[0]);
+				try
+				{
+					ret.coefs[index] = std::stod(elements[0]);
+				}
+				catch (std::exception e)
+				{
+					ERROR("The equation is not formatted correctly: coefficients must be convertable to a double type.")
+					exit(EXIT_FAILURE);
+				}
 			}
 			else
 			{
-				ERROR("The equation is not formatted correctly: exponents must be organized and present")
+				ERROR("The equation is not formatted correctly: exponents must be organized and present.")
 				exit(EXIT_FAILURE);
 			}
 		}
 		else
 		{
-			ERROR("The equation is not formatted correctly: exponents must be written as 'coef * X^n'")
+			ERROR("The equation is not formatted correctly: exponents must be written as 'coef * X^n'.")
 			exit(EXIT_FAILURE);
 		}
 
@@ -176,17 +143,17 @@ void Parser::printReducedForm(void)
 	{
 		if (this->_coefs.coefs[i] >= 0 && i == 0)
 		{
-			reduced_form.append(_removeTrailingZeros(std::to_string(this->_coefs.coefs[i])));
+			reduced_form.append(removeTrailingZeros(std::to_string(this->_coefs.coefs[i])));
 		}
 		else if (this->_coefs.coefs[i] >= 0)
 		{
 			reduced_form.append("+ ");
-			reduced_form.append(_removeTrailingZeros(std::to_string(this->_coefs.coefs[i])));
+			reduced_form.append(removeTrailingZeros(std::to_string(this->_coefs.coefs[i])));
 		}
 		else
 		{
 			reduced_form.append("- ");
-			reduced_form.append(_removeTrailingZeros(std::to_string(-this->_coefs.coefs[i])));
+			reduced_form.append(removeTrailingZeros(std::to_string(-this->_coefs.coefs[i])));
 		}
 		reduced_form += " * ";
 		reduced_form += "X^";
@@ -208,6 +175,11 @@ void Parser::printDegree(void) const
 coefficients Parser::getCoefs(void) const
 {
 	return _coefs;
+}
+
+unsigned int Parser::getDegree(void) const
+{
+	return _deg;
 }
 
 /* ************************************************************************** */

@@ -3,20 +3,22 @@
 
 # include <iostream>
 # include <string>
+# include <cmath>
+# include "Parser.hpp"
 
 class Solver
 {
 
-	public:
+public:
+	Solver(Parser &prs);
+	~Solver();
 
-		Solver();
-		Solver( Solver const & src );
-		~Solver();
+	// Methods
+	void	compute(void);
 
-		Solver &		operator=( Solver const & rhs );
+private:
 
-	private:
-
+	Parser	& _parser;
 };
 
 #endif /* ********************************************************** SOLVER_H */

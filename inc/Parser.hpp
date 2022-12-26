@@ -19,18 +19,13 @@ public:
 	Parser(std::string equation);
 	~Parser();
 
-	Parser &operator=(Parser const &rhs);
-
 private:
-	Parser();
-	Parser(Parser const &src);
-
-	std::string _removeTrailingZeros(std::string number);
 	coefficients _sideParser(std::string side) const;
 
 	// Methods and accessors
 public:
 	coefficients getCoefs(void) const;
+	unsigned int getDegree(void) const;
 	void printReducedForm(void);
 	void printDegree(void) const;
 

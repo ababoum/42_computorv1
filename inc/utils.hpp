@@ -5,6 +5,7 @@
 # include <string>
 # include <stdlib.h>
 # include <vector>
+# include <algorithm>
 
 # define F_NONE		"\e[37;0m"
 # define F_BOLD		"\e[1m"
@@ -22,5 +23,8 @@
 
 std::vector<std::string>	split(const std::string &str, char delim);
 std::vector<std::string>	split(const std::string &str, const char *set_delim);
+std::string					removeTrailingZeros(std::string number);
+void						trim(std::string &s);
+std::string					trim_copy(std::string s);
 
 #endif
