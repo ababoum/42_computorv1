@@ -50,6 +50,10 @@
 		"cstring": "cpp",
 		"deque": "cpp",
 		"sstream": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"bitset": "cpp",
+		"ctime": "cpp",
+		"map": "cpp",
+		"regex": "cpp"
 	}
 }

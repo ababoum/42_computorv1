@@ -9,5 +9,8 @@ int main(int ac, char **av)
 		return (EXIT_FAILURE);
 	}
 	Parser prs((std::string(av[1])));
+
+	prs.printReducedForm();
+	prs.printDegree();
 	return (EXIT_SUCCESS);
 }
